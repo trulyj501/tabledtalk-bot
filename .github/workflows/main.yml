@@ -1,0 +1,36 @@
+name: Daily Bot
+
+on:
+  schedule:
+    # 한국 시간(KST) 오전 8시는 UTC 기준 전날 밤 11시(23:00)입니다.
+    - cron: '0 23 * * *'
+  workflow_dispatch: # 수동으로 실행해볼 수 있는 버튼 생성
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # 파일 쓰기 권한 허용 (last_post.txt 업데이트용)
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+        
+      - name: Run Bot
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: python bot.py
+        
+      - name: Commit and Push
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git add last_post.txt
+          git commit -m "Update last post" || echo "No changes to commit"
+          git push

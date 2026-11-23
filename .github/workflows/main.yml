@@ -2,31 +2,31 @@ name: Daily Bot
 
 on:
   schedule:
-    # 한국 시간(KST) 오전 8시는 UTC 기준 전날 밤 11시(23:00)입니다.
+    # 한국 시간(KST) 오전 8시 = UTC 23:00
     - cron: '0 23 * * *'
-  workflow_dispatch: # 수동으로 실행해볼 수 있는 버튼 생성
+  workflow_dispatch:
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # 파일 쓰기 권한 허용 (last_post.txt 업데이트용)
+      contents: write # last_post.txt 업데이트 권한
     steps:
-      - uses: actions/checkout@v3
-      
+      - uses: actions/checkout@v7
+
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v7
         with:
-          python-version: '3.9'
-          
+          python-version: '3.12'
+
       - name: Install dependencies
         run: pip install -r requirements.txt
-        
+
       - name: Run Bot
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: python bot.py
-        
+
       - name: Commit and Push
         run: |
           git config --global user.name 'github-actions'
